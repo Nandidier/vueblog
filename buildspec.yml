@@ -1,0 +1,16 @@
+version: 0.0
+phases:
+  install:
+    commands:
+     - apk add --no-cache --update python3
+     - pip3 install awscli
+     - apk add curl
+  build:
+    comands:
+      - npm install
+      - npm build
+      - aws s3 sync ./dist s3://$BUCKET_NAME/ --delete --cache-control max-age=$CACHE_CONTROL_MAX_AGE
+  post_builds:
+    commands:
+      - 'curl -X POST -d "{\"text\": \"Environment deployment succeded\", \"attachments\": [{\"color\": \"#00CC00\",\"title\": \"Deployment informations\", \"text\": \"Repository: App\nBranch: \nBucket: $BUCKET_NAME\"}]}" https://hooks.slack.com/services/$SLACK_HOOK'
+      - echo "Sucess!"
